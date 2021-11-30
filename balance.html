@@ -1,0 +1,68 @@
+<html>
+  <head>
+      <title>Balance</title>
+  </head>
+  <body>
+    <h1>Balance</h1>
+    <form>
+        <textarea rows="5" cols="120"></textarea>
+    </form>
+    <div>
+      <h2>Output</h2>
+      <div>
+        <h3>Summary</h3>
+        <div id="summary"></div>
+      </div>
+      
+      <div>
+        <h3>Detail</h3>
+        <div id="detail"></div>
+      </div>
+    </div>
+    <script>
+      function hashcode(s) {
+        return s.split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0);
+      }
+      
+      const hex = (prev, curr) => prev + curr.toString(16).padStart(2, '0');
+
+      function getColors(value) {
+        value >>>= 0;
+        const color = [value & 0xFF, (value & 0xFF00) >>> 8, (value & 0xFF0000) >>> 16]
+        const brightness = Math.round(((color[0] * 299) + (color[1] * 587) + (color[2] * 114)) / 1000);
+        const textColor = (brightness > 125) ? 'black' : 'white';
+        return [color.reduce(hex, ""), textColor];
+      }
+
+      const summary = document.getElementById("summary");
+      const detail = document.getElementById("detail");
+
+      function rerender(e) {
+        const text = e.target.value;
+        const textHash = hashcode(text);
+        summary.textContent = "" + textHash;
+        const colors = getColors(textHash);
+        summary.style.backgroundColor = colors[0];
+        summary.style.color = colors[1];
+        
+        detail.innerHTML = "";
+        text.split("\n").forEach(line => {   
+          for (let i = 0; i < line.length; i += 4) {
+            const chunk = line.slice(i, i + 4);
+            const chunkHash = hashcode(chunk);
+            const ccolors = getColors(chunkHash);
+            const span = document.createElement("span");
+            span.innerHTML = chunk.replaceAll(" ", "&nbsp;").replaceAll("\t", "¬¬¬¬");
+            span.style.backgroundColor = ccolors[0];
+            span.style.color = ccolors[1];
+            detail.appendChild(span);
+          }
+          detail.appendChild(document.createElement("br"));
+        });
+      }
+
+      const textarea = document.getElementsByTagName("textarea")[0];
+      textarea.addEventListener("change", rerender);
+    </script>
+  </body>
+</html>
