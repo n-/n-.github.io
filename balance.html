@@ -35,7 +35,7 @@
     </div>
     <script>
       function hashcode(s) {
-        return s.split('').reduce((a,b) => (((a << 5) - a) + b.charCodeAt(0))|0, 0);
+        return s.split('').reduce((a,b) => 149 * ((((a << 5) - a) + b.charCodeAt(0))|0), 0);
       }
       
       const hex = (prev, curr) => prev + curr.toString(16).padStart(2, '0');
