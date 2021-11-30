@@ -84,6 +84,7 @@
             span.innerHTML = escapeCode(chunk);
             span.style.backgroundColor = ccolors[0];
             span.style.color = ccolors[1];
+            span.setAttribute("title", i)
             detail.appendChild(span);
           }
           detail.appendChild(document.createElement("br"));
