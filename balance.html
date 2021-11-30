@@ -4,6 +4,7 @@
   </head>
   <body>
     <h1>Balance</h1>
+    <p>Renders text and code for easier comparison</p>
     <form>
         <textarea rows="5" cols="120"></textarea>
     </form>
@@ -34,6 +35,21 @@
         return [color.reduce(hex, ""), textColor];
       }
 
+      const escapeCode = str =>
+        str.replace(
+          /[&<>'"\s]/g,
+          tag =>
+          ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            "'": '&#39;',
+            '"': '&quot;',
+            ' ': '&nbsp;',
+            '\t': '¬¬¬¬'
+          }[tag] || tag)
+        );
+
       const summary = document.getElementById("summary");
       const detail = document.getElementById("detail");
 
@@ -52,7 +68,7 @@
             const chunkHash = hashcode(chunk);
             const ccolors = getColors(chunkHash);
             const span = document.createElement("span");
-            span.innerHTML = chunk.replaceAll(" ", "&nbsp;").replaceAll("\t", "¬¬¬¬");
+            span.innerHTML = escapeCode(chunk);
             span.style.backgroundColor = ccolors[0];
             span.style.color = ccolors[1];
             detail.appendChild(span);
