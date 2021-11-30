@@ -1,25 +1,25 @@
 <html>
   <head>
-      <title>Balance</title>
-      <style>
-        html {
-          font-family: sans-serif;
-        }
+    <title>Balance</title>
+    <style>
+      html {
+        font-family: sans-serif;
+      }
 
-        body {
-          padding: 20px;
-        }
+      body {
+        padding: 20px;
+      }
 
-        #detail {
-          font-family: monospace;
-        }
-      </style>
+      #detail {
+        font-family: monospace;
+      }
+    </style>
   </head>
   <body>
     <h1>Balance</h1>
     <p>Renders text and code for easier comparison</p>
     <form>
-        <textarea rows="5" cols="120"></textarea>
+      <textarea rows="5" cols="120"></textarea>
     </form>
     <div>
       <h2>Output</h2>
@@ -27,40 +27,41 @@
         <h3>Summary</h3>
         <div id="summary"></div>
       </div>
-      
+
       <div>
         <h3>Detail</h3>
         <div id="detail"></div>
       </div>
     </div>
+
     <script>
       function hashcode(s) {
-        return s.split('').reduce((a,b) => 149 * ((((a << 5) - a) + b.charCodeAt(0))|0), 0);
+        return s.split("").reduce((a, b) => 149 * (((a << 5) - a + b.charCodeAt(0)) | 0), 0);
       }
-      
-      const hex = (prev, curr) => prev + curr.toString(16).padStart(2, '0');
+
+      const hex = (prev, curr) => prev + curr.toString(16).padStart(2, "0");
 
       function getColors(value) {
         value >>>= 0;
-        const color = [value & 0xFF, (value & 0xFF00) >>> 8, (value & 0xFF0000) >>> 16]
-        const brightness = Math.round(((color[0] * 299) + (color[1] * 587) + (color[2] * 114)) / 1000);
-        const textColor = (brightness > 125) ? 'black' : 'white';
+        const color = [value & 0xff, (value & 0xff00) >>> 8, (value & 0xff0000) >>> 16];
+        const brightness = Math.round((color[0] * 299 + color[1] * 587 + color[2] * 114) / 1000);
+        const textColor = brightness > 125 ? "black" : "white";
         return [color.reduce(hex, ""), textColor];
       }
 
-      const escapeCode = str =>
+      const escapeCode = (str) =>
         str.replace(
           /[&<>'"\s]/g,
-          tag =>
-          ({
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            "'": '&#39;',
-            '"': '&quot;',
-            ' ': '&nbsp;',
-            '\t': '¬¬¬¬'
-          }[tag] || tag)
+          (tag) =>
+            ({
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              "'": "&#39;",
+              '"': "&quot;",
+              " ": "&nbsp;",
+              "\t": "¬¬¬¬",
+            }[tag] || tag)
         );
 
       const summary = document.getElementById("summary");
@@ -73,9 +74,9 @@
         const colors = getColors(textHash);
         summary.style.backgroundColor = colors[0];
         summary.style.color = colors[1];
-        
+
         detail.innerHTML = "";
-        text.split("\n").forEach(line => {   
+        text.split("\n").forEach((line) => {
           for (let i = 0; i < line.length; i += 4) {
             const chunk = line.slice(i, i + 4);
             const chunkHash = hashcode(chunk);
@@ -84,7 +85,7 @@
             span.innerHTML = escapeCode(chunk);
             span.style.backgroundColor = ccolors[0];
             span.style.color = ccolors[1];
-            span.setAttribute("title", i)
+            span.setAttribute("title", i);
             detail.appendChild(span);
           }
           detail.appendChild(document.createElement("br"));
