@@ -13,6 +13,22 @@
       #detail {
         font-family: monospace;
       }
+
+      @keyframes blinker {
+          50% {
+              opacity: 0;
+          }
+      }
+
+      @keyframes blinkerChunk {
+          50% {
+              border-color: #00000080;
+              border-width: 0.2em;
+              border-style: solid;
+              margin: -0.2em;
+              z-index: -10;
+          }
+      }
     </style>
   </head>
   <body>
@@ -35,8 +51,8 @@
     </div>
 
     <script>
-      function hashcode(s) {
-        return s.split("").reduce((a, b) => 149 * (((a << 5) - a + b.charCodeAt(0)) | 0), 0);
+      function hashcode(s, initialValue) {
+        return s.split("").reduce((a, b) => 149 * (((a << 5) - a + b.charCodeAt(0)) | 0), initialValue);
       }
 
       const hex = (prev, curr) => prev + curr.toString(16).padStart(2, "0");
@@ -69,31 +85,65 @@
 
       function rerender(e) {
         const text = e.target.value;
-        const textHash = hashcode(text);
+        const textHash = hashcode(text, 0);
         summary.textContent = "" + textHash;
         const colors = getColors(textHash);
         summary.style.backgroundColor = colors[0];
         summary.style.color = colors[1];
 
+        let selectedLine = -1;
+        let selectedColumn = -1;
+        if (document.activeElement === e.target) {
+          const cursorPosition = e.target.selectionStart;
+          const beforeText = text.slice(0, cursorPosition);
+          const beforeLines = beforeText.split("\n");
+          selectedLine = beforeLines.length - 1;
+          if (!!beforeLines) {
+              selectedColumn = beforeLines[beforeLines.length - 1].length;
+          } else {
+              selectedColumn = 0;
+          }
+        }
+
+        function insertCursor(parent) {
+          const cursorMarker = document.createElement("span");
+          cursorMarker.innerText = "@";
+          cursorMarker.style.backgroundColor = "black";
+          cursorMarker.style.animation = "blinker 0.5s step-start infinite";
+          parent.appendChild(cursorMarker);
+        }        
+
         detail.innerHTML = "";
-        text.split("\n").forEach((line) => {
+        text.split("\n").forEach((line, lineNumber) => {
+          // insertCursor(lineNumber, 0, detail);
+          if (line.length === 0 && selectedColumn === 0 && lineNumber === selectedColumn) {
+            insertCursor(detail)
+          }
           for (let i = 0; i < line.length; i += 4) {
             const chunk = line.slice(i, i + 4);
-            const chunkHash = hashcode(chunk);
+            const chunkHash = hashcode(chunk, i+1);
             const ccolors = getColors(chunkHash);
             const span = document.createElement("span");
             span.innerHTML = escapeCode(chunk);
             span.style.backgroundColor = ccolors[0];
             span.style.color = ccolors[1];
+            span.style.borderWidth = "0em";
             span.setAttribute("title", i);
+            if (lineNumber === selectedLine && selectedColumn >= i && selectedColumn < (i+4)) {
+                span.style.animation = "blinkerChunk 0.5s step-start infinite";
+            }
             detail.appendChild(span);
+          }
+          if (line.length % 4 === 0 && selectedColumn === line.length && lineNumber === selectedLine) {
+              insertCursor(detail);
           }
           detail.appendChild(document.createElement("br"));
         });
       }
 
       const textarea = document.getElementsByTagName("textarea")[0];
-      textarea.addEventListener("change", rerender);
+      textarea.addEventListener("input", rerender);
+      textarea.addEventListener("click", rerender);
     </script>
   </body>
 </html>
